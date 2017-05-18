@@ -1,0 +1,7 @@
+import cPickle as pickle
+
+def pickle_model(pklfile, X, y, log_reg_C=10000.) :
+    model = LogisticRegression(C=log_reg_C)
+    model.fit(X, y)
+
+    dump_model(pklfile, model)
