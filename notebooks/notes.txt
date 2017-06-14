@@ -1,0 +1,31 @@
+(1) Load in the T and rho cubes, calculate ysz (pressure with
+constants). --> Done
+
+(2) Get the r500, m500, r200, m200 values. --> Done
+
+(3) Choose an rmin and rmax in terms of cells. --> Done
+
+(4) Calculate cube distances in 2d and 3d do this once.
+
+---> Should be done in terms of midpoints of the cells.  These range
+     from 0-255, with 256 cells in the x, y, and z directions.
+
+---> Done
+
+(5) Get the cell indices that correspond to rmin and rmax in 2d and 3d
+with a numpy.where statement.  **I can do this simple at first, and
+fancy (e.g. random sampling) later**
+
+--> Done
+
+(6) Get Y value from gas in that shell or annular region.
+
+--> Done
+
+(7) Get the dV (or multiply each nT by dV): Y = 1/dA^2 * (kb*sigT/me*c^2) * \int ne Te dV
+
+--> Done
+
+(8) Plot Yth vs. M at R500c, R200c, and R200m to make sure values are
+okay.  (i.e. write a script to do all of the above, and directly apply
+to the L500 data on omega, make a plot to confirm).
