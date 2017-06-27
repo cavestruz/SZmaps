@@ -1,3 +1,6 @@
+Check class of if it's just a numpy array or not.
+
+--------------
 (1) Load in the T and rho cubes, calculate ysz (pressure with
 constants). --> Done
 
