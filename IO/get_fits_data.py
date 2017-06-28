@@ -5,7 +5,7 @@ import numpy as np
 
 def create_yt_datastruc_from_cubes(fitsdir, aexp, halo_id, Lv,
                                    Lbox_fits=np.array([256.,256.,256.]),
-                                   max_Lv_kpc=3.6) :
+                                   max_Lv_kpc=3.8/0.7) :
 
         redshift = 1/float(aexp) - 1.
         art_data_arrays = collect_art_data_arrays(fitsdir, aexp, halo_id, Lv)
