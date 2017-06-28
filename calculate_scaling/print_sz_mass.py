@@ -21,10 +21,11 @@ props =['r200m','r500c','M_total_200m','M_total_500c']
 halo_props = sim.get_halo_properties(halo_ids, props, aexp)
 
 def integrate_in_yt_volume(yt_volume_type, field_name, *volume_type_params) :
-
+    
     yt_volume = yt_volume_type(*volume_type_params)
+    num_points = yt_volume[field_name].size
     integrated_szy = yt_volume[field_name].sum().in_units('1/Mpc')
-    volume = yt_volume.volume().in_units('Mpc**3')
+    volume = yt_volume.volume().in_units('Mpc**3') / num_points
     
     return integrated_szy * volume
 
@@ -55,10 +56,10 @@ for halo_id in halo_ids :
     szy_scaling['M200m'].append(M200m)
     
     # Get the angular diameter distance with minimum observable redshift to 0.02
-    from yt.utilities.cosmology import Cosmology
-    cosmo = Cosmology()
-    (zi, zf) = ( 0,  max(0.02,1./float(aexp)-1.) )
-    dA = cosmo.angular_diameter_distance(zi,zf).in_units('Mpc')
+    # from yt.utilities.cosmology import Cosmology
+    # cosmo = Cosmology()
+    # (zi, zf) = ( 0,  max(0.02,1./float(aexp)-1.) )
+    # dA = cosmo.angular_diameter_distance(zi,zf).in_units('Mpc')
     
     # Integrate in a sphere
     center = [0.5, 0.5, 0.5]
