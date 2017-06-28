@@ -9,17 +9,18 @@ database_dir = '/data/avestruz/L500/databases/'
 database_sim_name = 'L500_NR_0'
 
 fits_dir = '/data/avestruz/L500/fits_cubes/'
-aexp = '1.0005'
+#aexp = '1.0005'
+Lv=5
 
 # Load the database and get properties of interest
 sim = db.Simulation(database_sim_name,
                        db_dir=database_dir
                                          )
-halo_ids = sim.get_halo_ids()
-#halo_ids = [1]
-props =['r200m','r500c','M_total_200m','M_total_500c']
 
-halo_props = sim.get_halo_properties(halo_ids, props, aexp)
+#halo_ids = [1]
+props =['r200m','r500c','r200c','M_total_200m','M_total_500c','M_total_200c']
+
+
 
 def integrate_in_yt_volume(yt_volume_type, field_name, *volume_type_params) :
     yt_volume = yt_volume_type(*volume_type_params)
@@ -32,66 +33,69 @@ def integrate_in_yt_volume(yt_volume_type, field_name, *volume_type_params) :
 
 from collections import defaultdict
 
-szy_scaling = defaultdict(list)
+for aexp in ['1.0005','0.5014'] :
 
-for halo_id in halo_ids :
-    print halo_id
-    szy_scaling['halo_ids'].append( halo_id )
+    szy_scaling = defaultdict(list)
+    halo_ids = sim.get_halo_ids(aexp=aexp)
+    halo_props = sim.get_halo_properties(halo_ids, props, aexp)
 
-    # Create yt datastructure
-    yt_datastruct = gf.create_yt_datastruc_from_cubes(fits_dir,aexp,halo_id, 6)
-    dd = yt_datastruct.all_data()
+    for halo_id in halo_ids :
+        print halo_id
+        szy_scaling['halo_ids'].append( halo_id )
 
-    # Get the halo properties from the database
-    halo_prop = halo_props.loc[halo_props['id'] == halo_id]
-    #print halo_prop
-    r200m = float(halo_prop['r200m'])/.7 #* kpc 
-    r500c = float(halo_prop['r500c'])/.7 #* kpc
+        # Create yt datastructure
+        yt_datastruct = gf.create_yt_datastruc_from_cubes(fits_dir,aexp,halo_id, Lv)
+        dd = yt_datastruct.all_data()
 
-    M200m = float(halo_prop['M_total_200m']) #* Msun
-    M500c = float(halo_prop['M_total_500c']) #* Msun
+        # Get the halo properties from the database
+        halo_prop = halo_props.loc[halo_props['id'] == halo_id]   
 
-    szy_scaling['r200m'].append(r200m)
-    szy_scaling['r500c'].append(r500c)
-    szy_scaling['M500c'].append(M500c)
-    szy_scaling['M200m'].append(M200m)
-    
-    # Get the angular diameter distance with minimum observable redshift to 0.02
-    # from yt.utilities.cosmology import Cosmology
-    # cosmo = Cosmology()
-    # (zi, zf) = ( 0,  max(0.02,1./float(aexp)-1.) )
-    # dA = cosmo.angular_diameter_distance(zi,zf).in_units('Mpc')
-    
-    # Integrate in a sphere
-    center = [0.5, 0.5, 0.5]
-    Ysz500c = integrate_in_yt_volume( yt_datastruct.sphere, 'szy',
-                                 center,(r500c,'kpc') ) 
 
-    szy_scaling['Ysz500c'].append(Ysz500c.value)
 
-    # Integrate in a cylinder
-    radius = ( r500c, 'kpc' )
-    depth = ( 3*r500c, 'kpc' )
-    normal_vectors = {'x': [1,0,0],
-                      'y': [0,1,0],
-                      'z': [0,0,1]
-    }
+        r200m = float(halo_prop['r200m'])/.7 #* kpc 
+        r200c = float(halo_prop['r200c'])/.7 #* kpc
+        r500c = float(halo_prop['r500c'])/.7 #* kpc
+        
+        M200m = float(halo_prop['M_total_200m']) #* Msun/h
+        M200c = float(halo_prop['M_total_200c']) #* Msun/h
+        M500c = float(halo_prop['M_total_500c']) #* Msun/h
+        
+        szy_scaling['r200m'].append(r200m)
+        szy_scaling['r200c'].append(r200c)
+        szy_scaling['r500c'].append(r500c)
+        szy_scaling['M200m'].append(M200m)
+        szy_scaling['M200c'].append(M200c)
+        szy_scaling['M500c'].append(M500c)
+            
+        # Integrate in a sphere
+        center = [0.5, 0.5, 0.5]
 
-    
-    for los, normal_vector in normal_vectors.iteritems() :
-        Yszcylinder = integrate_in_yt_volume( yt_datastruct.disk, 'szy',
-                                              center, normal_vector,
-                                              radius, depth ) 
-        szy_scaling['Yszcyl_'+los].append( Yszcylinder.value )
+        for rname, rval in [ ('r200m',r200m),('r200c',r200c),('r500c',r500c) ] :
+            Yszsph = integrate_in_yt_volume( yt_datastruct.sphere, 'szy',
+                                             center, (rval,'kpc') ) 
+        
+            szy_scaling['Ysz'+rname].append(Yszsph.value)
 
         
-import pandas as pd
-
-df = pd.DataFrame(szy_scaling)
-df.to_csv( path_or_buf='szyscaling.csv', sep=' ', index=False )
-
-
-
+        
+            # Integrate in a cylinder
+            radius = ( rval, 'kpc' )
+            depth = ( 3*rval, 'kpc' )
+            normal_vectors = {'x': [1,0,0],
+                              'y': [0,1,0],
+                              'z': [0,0,1]
+                              }
 
     
+            for los, normal_vector in normal_vectors.iteritems() :
+                Yszcylinder = integrate_in_yt_volume( yt_datastruct.disk, 'szy',
+                                                      center, normal_vector,
+                                                      radius, depth ) 
+                szy_scaling['Yszcyl_'+los+'_'+rname].append( Yszcylinder.value )
+
         
+        import pandas as pd
+        
+        df = pd.DataFrame(szy_scaling)
+        df.to_csv( path_or_buf='szyscaling_a'+aexp+'.csv', sep=' ', index=False )
+

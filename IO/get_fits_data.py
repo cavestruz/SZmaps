@@ -12,6 +12,7 @@ def create_yt_datastruc_from_cubes(fitsdir, aexp, halo_id, Lv,
         
         # Create the input data kwarg for load_uniform_grid
         data = dict()
+
         for yt_field, art in ytname2artname.iteritems() :
             art_data_array = art_data_arrays[art['name']]
             
@@ -19,7 +20,7 @@ def create_yt_datastruc_from_cubes(fitsdir, aexp, halo_id, Lv,
             
             data[yt_field] = (art_data_array, art['units'])
             
-        length_unit = calculate_length_unit_box( Lbox_fits, max_Lv_kpc, Lv )
+        length_unit = calculate_length_unit_box( Lbox_fits, max_Lv_kpc, Lv, aexp )
         import yt
         return yt.load_uniform_grid(data, Lbox_fits, length_unit=length_unit)
         

@@ -9,10 +9,10 @@ def collect_art_data_arrays (fitsdir, aexp, halo_id, Lv) :
              getdata(fitsfile)
              for fitsfile in fitsfiles }
 
-def calculate_length_unit_box( Lbox_fits, max_Lv_kpc, Lv ) :
+def calculate_length_unit_box( Lbox_fits, max_Lv_kpc, Lv, aexp ) :
         # Define the Lbox in cm, which is the length unit of the whole box
         from yt.units import kpc
-        Lbox = Lbox_fits * max_Lv_kpc * 2**(8-Lv) * kpc
+        Lbox = Lbox_fits * max_Lv_kpc * 2**(8-Lv) * kpc / float(aexp)
         Lbox = Lbox.in_units('cm')
         return Lbox.value[0]
 
