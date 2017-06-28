@@ -45,8 +45,8 @@ for halo_id in halo_ids :
     # Get the halo properties from the database
     halo_prop = halo_props.loc[halo_props['id'] == halo_id]
     #print halo_prop
-    r200m = float(halo_prop['r200m']) #* kpc 
-    r500c = float(halo_prop['r500c']) #* kpc
+    r200m = float(halo_prop['r200m'])/.7 #* kpc 
+    r500c = float(halo_prop['r500c'])/.7 #* kpc
 
     M200m = float(halo_prop['M_total_200m']) #* Msun
     M500c = float(halo_prop['M_total_500c']) #* Msun
@@ -68,6 +68,7 @@ for halo_id in halo_ids :
                                  center,(r500c,'kpc') ) 
 
     szy_scaling['Ysz500c'].append(Ysz500c.value)
+
     # Integrate in a cylinder
     radius = ( r500c, 'kpc' )
     depth = ( 3*r500c, 'kpc' )
