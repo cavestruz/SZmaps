@@ -65,7 +65,7 @@ for halo_id in halo_ids :
     # Integrate in a sphere
     center = [0.5, 0.5, 0.5]
     Ysz500c = integrate_in_yt_volume( yt_datastruct.sphere, 'szy',
-                                 center,(r500c,'kpc') ) / dA**2
+                                 center,(r500c,'kpc') ) 
 
     szy_scaling['Ysz500c'].append(Ysz500c.value)
     # Integrate in a cylinder
@@ -80,7 +80,7 @@ for halo_id in halo_ids :
     for los, normal_vector in normal_vectors.iteritems() :
         Yszcylinder = integrate_in_yt_volume( yt_datastruct.disk, 'szy',
                                               center, normal_vector,
-                                              radius, depth ) / dA**2
+                                              radius, depth ) 
         szy_scaling['Yszcyl_'+los].append( Yszcylinder.value )
 
         
