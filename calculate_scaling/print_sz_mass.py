@@ -4,24 +4,24 @@ import L500analysis.caps.io.reader as db
 from yt.units import kpc, Msun, Mpc
 from SZmaps.IO import get_fits_data as gf
 
-database_dir = '/home/babyostrich/data/databases/'
+database_dir = '/data/avestruz/L500/databases/'
+# /home/babyostrich/data/databases/
 database_sim_name = 'L500_NR_0'
 
-fits_dir = '/home/babyostrich/data/L500_fits/'
+fits_dir = '/data/avestruz/L500/fits_cubes/'
 aexp = '1.0005'
 
 # Load the database and get properties of interest
 sim = db.Simulation(database_sim_name,
                        db_dir=database_dir
                                          )
-#halo_ids = sim.get_halo_ids()
-halo_ids = [1]
+halo_ids = sim.get_halo_ids()
+#halo_ids = [1]
 props =['r200m','r500c','M_total_200m','M_total_500c']
 
 halo_props = sim.get_halo_properties(halo_ids, props, aexp)
 
 def integrate_in_yt_volume(yt_volume_type, field_name, *volume_type_params) :
-
     yt_volume = yt_volume_type(*volume_type_params)
     integrated_szy = yt_volume[field_name].sum().in_units('1/Mpc')
     volume = yt_volume.volume().in_units('Mpc**3')
@@ -34,7 +34,7 @@ from collections import defaultdict
 szy_scaling = defaultdict(list)
 
 for halo_id in halo_ids :
-    
+    print halo_id
     szy_scaling['halo_ids'].append( halo_id )
 
     # Create yt datastructure
@@ -43,11 +43,12 @@ for halo_id in halo_ids :
 
     # Get the halo properties from the database
     halo_prop = halo_props.loc[halo_props['id'] == halo_id]
-    r200m = halo_prop['r200m'][0] #* kpc 
-    r500c = halo_prop['r500c'][0] #* kpc
+    #print halo_prop
+    r200m = float(halo_prop['r200m']) #* kpc 
+    r500c = float(halo_prop['r500c']) #* kpc
 
-    M200m = halo_prop['M_total_200m'][0] #* Msun
-    M500c = halo_prop['M_total_500c'][0] #* Msun
+    M200m = float(halo_prop['M_total_200m']) #* Msun
+    M500c = float(halo_prop['M_total_500c']) #* Msun
 
     szy_scaling['r200m'].append(r200m)
     szy_scaling['r500c'].append(r500c)
@@ -85,7 +86,7 @@ for halo_id in halo_ids :
 import pandas as pd
 
 df = pd.DataFrame(szy_scaling)
-df.to_csv( path_or_buf='szyscaling', sep=' ', index=False )
+df.to_csv( path_or_buf='szyscaling.csv', sep=' ', index=False )
 
 
 

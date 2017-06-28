@@ -25,9 +25,10 @@ def _mean_matter_density(redshift) :
 ytname2artname = {
         'density':{'name':'rhogas','conversion':_mean_matter_density,'units':'g/cm**3'},
         'temperature':{'name':'temperature','units':'K'},
-        'velocity_x':{'name':'vx','units':'km/s'},
-        'velocity_y':{'name':'vy','units':'km/s'},
-        'velocity_z':{'name':'vz','units':'km/s'}
+        # 'velocity_x':{'name':'vx','units':'km/s'},
+        # 'velocity_y':{'name':'vy','units':'km/s'},
+        # 'velocity_z':{'name':'vz','units':'km/s'}
+
         }
 
 
