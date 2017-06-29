@@ -26,7 +26,7 @@ def integrate_in_yt_volume(yt_volume_type, field_name, *volume_type_params) :
     yt_volume = yt_volume_type(*volume_type_params)
     num_points = yt_volume[field_name].size
     integrated_szy = yt_volume[field_name].sum().in_units('1/Mpc')
-    volume = yt_volume.volume().in_units('Mpc**3') / num_points
+    volume = yt_volume.volume().in_units('Mpc**3') / float(num_points)
     
     return integrated_szy * volume
 
@@ -74,6 +74,7 @@ for aexp in ['1.0005','0.5014'] :
             Yszsph = integrate_in_yt_volume( yt_datastruct.sphere, 'szy',
                                              center, (rval,'kpc') ) 
         
+            assert( Yszsph.value > 1e-7 )
             szy_scaling['Ysz'+rname].append(Yszsph.value)
 
         
@@ -91,6 +92,7 @@ for aexp in ['1.0005','0.5014'] :
                 Yszcylinder = integrate_in_yt_volume( yt_datastruct.disk, 'szy',
                                                       center, normal_vector,
                                                       radius, depth ) 
+                assert(Yszcylinder.value > 1e-7)
                 szy_scaling['Yszcyl_'+los+'_'+rname].append( Yszcylinder.value )
 
         
