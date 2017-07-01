@@ -9,7 +9,7 @@ database_dir = '/data/avestruz/L500/databases/'
 database_sim_name = 'L500_NR_0'
 
 fits_dir = '/data/avestruz/L500/fits_cubes/'
-#aexp = '1.0005'
+aexps = ['1.0005', '0.5014']
 Lv=5
 
 # Load the database and get properties of interest
@@ -25,27 +25,29 @@ props =['r200m','r500c','r200c','M_total_200m','M_total_500c','M_total_200c']
 def integrate_in_yt_volume(yt_volume_type, field_name, *volume_type_params) :
     yt_volume = yt_volume_type(*volume_type_params)
     num_points = yt_volume[field_name].size
-    integrated_szy = yt_volume[field_name].sum().in_units('1/Mpc')
+    integrated_szy = yt_volume[field_name].sum()
     volume = yt_volume.volume().in_units('Mpc**3') / float(num_points)
-    
     return integrated_szy * volume
 
 
 from collections import defaultdict
 
-for aexp in ['1.0005','0.5014'] :
+for aexp in aexps  :
 
     szy_scaling = defaultdict(list)
     halo_ids = sim.get_halo_ids(aexp=aexp)
     halo_props = sim.get_halo_properties(halo_ids, props, aexp)
 
     for halo_id in halo_ids :
-        print halo_id
+        print "reading in halo ", halo_id
         szy_scaling['halo_ids'].append( halo_id )
 
         # Create yt datastructure
-        yt_datastruct = gf.create_yt_datastruc_from_cubes(fits_dir,aexp,halo_id, Lv)
+        yt_datastruct = gf.create_yt_datastruc_from_cubes(fits_dir, aexp, halo_id, Lv)
         dd = yt_datastruct.all_data()
+
+        # from SZmaps.plotting.slices import plot_slices
+        # plot_slices(yt_datastruct)
 
         # Get the halo properties from the database
         halo_prop = halo_props.loc[halo_props['id'] == halo_id]   
@@ -67,14 +69,17 @@ for aexp in ['1.0005','0.5014'] :
         szy_scaling['M200c'].append(M200c)
         szy_scaling['M500c'].append(M500c)
             
-        # Integrate in a sphere
         center = [0.5, 0.5, 0.5]
 
         for rname, rval in [ ('r200m',r200m),('r200c',r200c),('r500c',r500c) ] :
+            # Integrate in a sphere
             Yszsph = integrate_in_yt_volume( yt_datastruct.sphere, 'szy',
-                                             center, (rval,'kpc') ) 
-        
-            assert( Yszsph.value > 1e-7 )
+                                             center, (rval,'kpc') ).in_units('Mpc**2') 
+            try :
+                assert( Yszsph.value > 1e-9 )
+            except AssertionError:
+                print 'Ysz too small! ', Yszsph.value
+
             szy_scaling['Ysz'+rname].append(Yszsph.value)
 
         
@@ -91,13 +96,13 @@ for aexp in ['1.0005','0.5014'] :
             for los, normal_vector in normal_vectors.iteritems() :
                 Yszcylinder = integrate_in_yt_volume( yt_datastruct.disk, 'szy',
                                                       center, normal_vector,
-                                                      radius, depth ) 
+                                                      radius, depth ).in_units('Mpc**2')
                 assert(Yszcylinder.value > 1e-7)
                 szy_scaling['Yszcyl_'+los+'_'+rname].append( Yszcylinder.value )
 
         
-        import pandas as pd
+    import pandas as pd
         
-        df = pd.DataFrame(szy_scaling)
-        df.to_csv( path_or_buf='szyscaling_a'+aexp+'.csv', sep=' ', index=False )
+    df = pd.DataFrame(szy_scaling)
+    df.to_csv( path_or_buf='szyscaling_a'+aexp+'.csv', sep=' ', index=False )
 
