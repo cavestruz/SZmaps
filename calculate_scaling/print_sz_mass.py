@@ -9,8 +9,8 @@ database_dir = '/data/avestruz/L500/databases/'
 database_sim_name = 'L500_NR_0'
 
 fits_dir = '/data/avestruz/L500/fits_cubes/'
-aexps = ['1.0005', '0.5014']
-Lv=5
+aexps = ['1.0005']#, '0.5014']
+Lv=6
 
 # Load the database and get properties of interest
 sim = db.Simulation(database_sim_name,
@@ -62,7 +62,7 @@ for aexp in aexps  :
         M200c = float(halo_prop['M_total_200c']) #* Msun/h
         M500c = float(halo_prop['M_total_500c']) #* Msun/h
         
-        szy_scaling['r200m'].append(r200m)
+        #szy_scaling['r200m'].append(r200m)
         szy_scaling['r200c'].append(r200c)
         szy_scaling['r500c'].append(r500c)
         szy_scaling['M200m'].append(M200m)
@@ -71,7 +71,8 @@ for aexp in aexps  :
             
         center = [0.5, 0.5, 0.5]
 
-        for rname, rval in [ ('r200m',r200m),('r200c',r200c),('r500c',r500c) ] :
+        for rname, rval in [ #('r200m',r200m),
+                             ('r200c',r200c),('r500c',r500c) ] :
             # Integrate in a sphere
             Yszsph = integrate_in_yt_volume( yt_datastruct.sphere, 'szy',
                                              center, (rval,'kpc') ).in_units('Mpc**2') 
@@ -104,5 +105,5 @@ for aexp in aexps  :
     import pandas as pd
         
     df = pd.DataFrame(szy_scaling)
-    df.to_csv( path_or_buf='szyscaling_a'+aexp+'.csv', sep=' ', index=False )
+    df.to_csv( path_or_buf='szyscaling_a'+aexp+'_Lv'+str(Lv)+'.csv', sep=' ', index=False )
 
