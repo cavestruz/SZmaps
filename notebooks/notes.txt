@@ -1,3 +1,7 @@
+When you measure and compare Yi / (Mi / 1e14) ** alpha / e^(lnA14) at different redshifts, you have to take beta*E(z) into account, so I think the value you should compute is Yi /  Yfit, where Yfit = (Mi / 1e14) ** alpha * e^(lnA14) * E(z)**(2/3).
+
+
+-------------------
 Check class of if it's just a numpy array or not.
 
 --------------
