@@ -21,7 +21,6 @@ sim = db.Simulation(database_sim_name,
 props =['r200m','r500c','r200c','M_total_200m','M_total_500c','M_total_200c']
 
 
-
 def integrate_in_yt_volume(yt_volume_type, field_name, *volume_type_params) :
     yt_volume = yt_volume_type(*volume_type_params)
     num_points = yt_volume[field_name].size
@@ -72,7 +71,8 @@ for aexp in aexps  :
         center = [0.5, 0.5, 0.5]
 
         for rname, rval in [ #('r200m',r200m),
-                             ('r200c',r200c),('r500c',r500c) ] :
+                             # ('r200c',r200c),
+                ('r500c',r500c)]:#, ('1.5r500c',1.5*r500c),] :
             # Integrate in a sphere
             Yszsph = integrate_in_yt_volume( yt_datastruct.sphere, 'szy',
                                              center, (rval,'kpc') ).in_units('Mpc**2') 
